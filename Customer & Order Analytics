@@ -74,11 +74,11 @@ FROM BIT_DB.FebSales
 WHERE orderdate like '02/18/19%';
 
 -- You can use LIKE for any kind of data, not just dates. E.G;
-SELECT distinct Product
+SELECT DISTINCT Product
 FROM BIT_DB.FebSales
 WHERE Product like '%Batteries%';
 
-SELECT distinct Product, Price
+SELECT DISTINCT Product, Price
 FROM BIT_DB.FebSales 
 WHERE Price like '%.99';
 
@@ -88,3 +88,51 @@ FROM BIT_DB.FebSales
 WHERE location like '%Los Angeles%'
 GROUP BY Product;
 
+-- Q.1 Which locations in New York received at least 3 orders in January, and how many orders did they each receive? 
+SELECT distinct location, COUNT(orderID)
+FROM BIT_DB.JanSales
+WHERE location LIKE '%NY%'
+AND length(orderid) = 6 
+AND orderid <> 'Order ID'
+GROUP BY location
+HAVING COUNT(orderID)>2
+
+-- Q.2 How many of each type of headphone were sold in February?
+SELECT DISTINCT Product, SUM(Quantity)
+FROM BIT_DB.FebSales
+WHERE Product like '%headphone%'
+GROUP BY Product
+AND length(orderid) = 6
+AND orderid <> 'Order ID';
+
+-- Q.3 What was the average amount spent per account in February?
+SELECT SUM(quantity*price)/COUNT(customers.acctnum)
+FROM BIT_DB.FebSales Feb
+LEFT JOIN BIT_DB.customers 
+ON FEB.orderid=customers.order_id
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID';
+
+-- OR 
+
+SELECT AVG(quantity*price)
+FROM BIT_DB.FebSales Feb
+LEFT JOIN BIT_DB.customers 
+ON FEB.orderid=customers.order_id
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID';
+
+-- Q.4 What was the average quantity of products purchased per account in February?
+SELECT SUM(quantity)/COUNT(customers.acctnum)
+FROM BIT_DB.FebSales Feb
+LEFT JOIN BIT_DB.customers
+ON FEB.orderid=customers.order_id
+WHERE length(orderid) = 6 
+AND orderid <> 'Order ID'
+
+-- Q.5 Which product brought in the most revenue in January and how much revenue did it bring in total?
+SELECT Product, SUM(quantity*price)
+FROM BIT_DB.JanSales 
+GROUP BY Product
+ORDER BY SUM(quantity*price) DESC 
+LIMIT 1;
